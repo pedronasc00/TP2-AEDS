@@ -5,8 +5,7 @@
 #include "ListaSonda.h"
 
 int main() {
-    clock_t start, stop;
-    start = clock();
+   
 
     LSonda ListaSondas;
     Sonda sondas;
@@ -38,7 +37,8 @@ int main() {
     }
 
     fclose(arq);
-
+    clock_t start, stop;
+    start = clock();
     AlgoritmoGuloso(&ListaSondas, rochas, N);
     ImprimeSolucao(&ListaSondas);
 
