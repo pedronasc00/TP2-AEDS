@@ -1,26 +1,20 @@
 #ifndef LISTASONDA_H
 #define LISTASONDA_H
-#define MAXTAM 3
+#define MAXTAMS 3
 #include "Sonda.h"
 
-typedef struct CelulaSonda *ApontadorSonda;
-typedef struct CelulaSonda
-{
-    Sonda sondas;
-    struct CelulaSonda *pProx;
-} CSonda;
+typedef int ApontadorSonda;
 
 typedef struct
 {
-    ApontadorSonda pPrimeiro;
-    ApontadorSonda pUltimo;
+    Sonda Sondas[MAXTAMS];
+    ApontadorSonda first, last;
 } LSonda;
 
 void FLVaziaSonda(LSonda* sLista);
 int LEVaziaSonda(LSonda* sLista);
-void LInsereSondas(LSonda* sLista, Sonda *pSonda);
-void LImprimeSonda(LSonda* sLista);
-void AlgoritmoGuloso(LSonda *sLista, Rocha *rochas, int num_rochas);
-void ImprimeSolucao(LSonda *sLista);
+int LInsereSondas(LSonda* sLista, Sonda pSonda);
+void bruteforce(LCompartimento *rochas, int capacity, int numSondas, LSonda *melhorSolucao);
+void LImprimeSolucao(LSonda* sLista);
 
 #endif

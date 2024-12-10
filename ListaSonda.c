@@ -1,91 +1,118 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include <math.h>
 #include "ListaSonda.h"
 
 void FLVaziaSonda(LSonda* sLista) {
-    sLista->pPrimeiro = (ApontadorSonda)malloc(sizeof(CSonda));
-    sLista->pUltimo = sLista->pPrimeiro;
-    sLista->pUltimo->pProx = NULL;
+    sLista->first = 0;
+    sLista->last = sLista->first;
 }
 
 int LEVaziaSonda(LSonda* sLista) {
-    return(sLista->pUltimo == sLista->pPrimeiro);
+    return(sLista->last == sLista->first);
 }
 
-void LInsereSondas(LSonda* sLista, Sonda *pSonda) {
-        sLista->pUltimo->pProx = (ApontadorSonda)malloc(sizeof(CSonda));
-        sLista->pUltimo = sLista->pUltimo->pProx;
-        sLista->pUltimo->sondas = *pSonda;
-        sLista->pUltimo->pProx = NULL;   
-}
-
-void LImprimeSonda(LSonda* sLista) {
-    ApontadorSonda pAux = sLista->pPrimeiro->pProx;
-
-    printf("\nSONDAS\n");
-    printf("---------------------------------\n\n");
-    while (pAux != NULL) {
-        printf("ID SONDA: %d\n", pAux->sondas.idSonda);
-        printf("CAPACIDADE: %d\n", pAux->sondas.capacidade);
-
-        pAux = pAux->pProx;
+int LInsereSondas(LSonda* sLista, Sonda pSonda) {
+    if (sLista->last == MAXTAMS) {
+        return 0;
     }
-    printf("---------------------------------\n");
+    sLista->Sondas[sLista->last++] = pSonda;
+    return 1;
 }
 
-void AlgoritmoGuloso(LSonda* listaSondas, Rocha* rochas, int num_rochas) {
-    qsort(rochas, num_rochas, sizeof(Rocha), comparar_rochas);
+void bruteforce(LCompartimento *rochas, int capacity, int numSondas, LSonda *melhorSolucao) {
+    int numRochas = rochas->lastR - rochas->firstR;
+    int iter = pow(2, numRochas);
+    int melhorValorTotal = -1;
 
-    bool* rochaUsada = (bool*)calloc(num_rochas, sizeof(bool));
-    ApontadorSonda sondaAtual;
-    ApontadorSonda melhorSonda;
+    for (int i = 0; i < iter; i++) {
+        LSonda sondasAtual;
+        FLVaziaSonda(&sondasAtual);
+        for (int k = 0; k < numSondas; k++) {
+            Sonda sonda;
+            InicializaSonda(&sonda, k + 1);
+            LInsereSondas(&sondasAtual, sonda);
+        }
+
+        int valorTotalAtual = 0;
+        int *rochasUsadas = (int *)calloc(numRochas, sizeof(int));
+
+        for (int j = 0; j < numRochas; j++) {
+            if ((i >> j) & 1 && !rochasUsadas[j]) {
+                int melhorSonda = -1;
 
 
-    for (int i = 0; i < num_rochas; i++) {
-        if (!rochaUsada[i]) {
-            melhorSonda = NULL;
+                for (int k = 0; k < numSondas; k++) {
+                    int potentialValue = sondasAtual.Sondas[k].valorAtual + rochas->rochas[j].valorI;
+                    int potentialWeight = sondasAtual.Sondas[k].pesoAtual + rochas->rochas[j].pesoI;
 
-            sondaAtual = listaSondas->pPrimeiro->pProx;
-            while (sondaAtual != NULL) {
-                float capacidadeRestante = sondaAtual->sondas.capacidade - sondaAtual->sondas.pesoAtual;
-                if (rochas[i].pesoI <= capacidadeRestante) {
-                    if (melhorSonda == NULL || (sondaAtual->sondas.valorAtual + rochas[i].valorI) > (melhorSonda->sondas.valorAtual + (melhorSonda != NULL? rochas[i].valorI: 0) ) ) {
-                        melhorSonda = sondaAtual;
+                    if (potentialWeight <= capacity && (melhorSonda == -1 || potentialValue > sondasAtual.Sondas[melhorSonda].valorAtual + rochas->rochas[j].valorI)) {
+                        melhorSonda = k;
                     }
                 }
-                sondaAtual = sondaAtual->pProx;
+
+                if (melhorSonda != -1) {
+                    sondasAtual.Sondas[melhorSonda].pesoAtual += rochas->rochas[j].pesoI;
+                    sondasAtual.Sondas[melhorSonda].valorAtual += rochas->rochas[j].valorI;
+                    LInsereRocha(&sondasAtual.Sondas[melhorSonda].CompartimentoR, rochas->rochas[j]);
+                    valorTotalAtual += rochas->rochas[j].valorI;
+                    rochasUsadas[j] = 1;
+                }
+            }
+        }
+
+        free(rochasUsadas);
+
+        if (valorTotalAtual > melhorValorTotal) {
+            melhorValorTotal = valorTotalAtual;
+
+            // Libera a memória da melhor solução anterior (se necessário)
+             if (melhorSolucao->Sondas != NULL && melhorSolucao->first != melhorSolucao->last) {
+                for (int k = melhorSolucao->first; k < melhorSolucao->last; k++) {
+                    FLVaziaRocha(&melhorSolucao->Sondas[k].CompartimentoR); // Libera as rochas
+                }
             }
 
-            if (melhorSonda != NULL) {
-                LInsereRocha(&melhorSonda->sondas.CompartimentoR, &rochas[i]);
-                melhorSonda->sondas.pesoAtual += rochas[i].pesoI;
-                melhorSonda->sondas.valorAtual += rochas[i].valorI;
-                rochaUsada[i] = true;
+
+            *melhorSolucao = sondasAtual; // Copia a melhor solução
+        } else {
+            // Libera a memória de sondasAtual, se não for a melhor
+            for (int k = 0; k < numSondas; k++) {
+                FLVaziaRocha(&sondasAtual.Sondas[k].CompartimentoR);
             }
         }
     }
-    free(rochaUsada);
+
+
+    // Impressão da melhor solução APÓS o loop principal
+        if(melhorSolucao->first != melhorSolucao->last){ // Verifica se alguma solução foi encontrada
+
+        printf("SOLUCAO\n");
+        printf("-------------------------------------\n");
+        for (int k = melhorSolucao->first; k < melhorSolucao->last; k++) {
+            printf("Sonda %d: Peso: %.0f, Valor: %d, Rochas: [ ",
+                   melhorSolucao->Sondas[k].idSonda, melhorSolucao->Sondas[k].pesoAtual, melhorSolucao->Sondas[k].valorAtual);
+
+            for (int r = melhorSolucao->Sondas[k].CompartimentoR.firstR; r < melhorSolucao->Sondas[k].CompartimentoR.lastR; r++) {
+                printf("%d ", melhorSolucao->Sondas[k].CompartimentoR.rochas[r].idRocha);
+            }
+            printf("]\n");
+        }
+        printf("-------------------------------------\n");
+    }
+
 }
 
-void ImprimeSolucao(LSonda *sLista) {
-    ApontadorSonda sondaAtual = sLista->pPrimeiro->pProx;
-    while (sondaAtual != NULL) {
-        printf("Sonda %d: ", sondaAtual->sondas.idSonda);
-        printf("Peso: %.0f, Valor: %d, ", sondaAtual->sondas.pesoAtual, sondaAtual->sondas.valorAtual); // Imprime peso e valor atuais
+void LImprimeSolucao(LSonda* sLista) {
+    int i, cont = 1;
 
-        printf("Solucao [");
-        ApontadorRocha rochaAtual = sondaAtual->sondas.CompartimentoR.pPrimeiro->pProx;
-        while (rochaAtual != NULL) {
-            printf("%d", rochaAtual->ItemRocha.idRocha);
-            rochaAtual = rochaAtual->pProx;
-            if (rochaAtual != NULL) {
-                printf(", ");
-            }
+    printf("SOLUCAO\n_____________________________\n");
+    for (i = sLista->first; i < sLista->last; i++) {
+        printf("Sonda %d: ", sLista->Sondas[i].idSonda);
+        printf("Peso: %d, Valor: %d, Solucao [", sLista->Sondas[i].pesoAtual, sLista->Sondas[i].valorAtual);
+        for (int j = sLista->Sondas[i].CompartimentoR.firstR; j < sLista->Sondas[i].CompartimentoR.lastR; j++) {
+            printf("%d ", sLista->Sondas[i].CompartimentoR.rochas[j].idRocha);
         }
-        printf("]\n");
-
-        sondaAtual = sondaAtual->pProx;
+        printf(" ]\n");
     }
-}  
+}

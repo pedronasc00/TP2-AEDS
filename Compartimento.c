@@ -3,31 +3,30 @@
 #include "Compartimento.h"
 
 void FLVaziaRocha(LCompartimento *rLista) {
-    rLista->pPrimeiro = (ApontadorRocha)malloc(sizeof(CCompartimento));
-    rLista->pUltimo = rLista->pPrimeiro;
-    rLista->pPrimeiro->pProx = NULL;
+    rLista->firstR = 0;
+    rLista->lastR = rLista->firstR;
 }
 
-void LInsereRocha(LCompartimento* rLista, Rocha* pRocha) {
-    rLista->pUltimo->pProx = (ApontadorRocha)malloc(sizeof(CCompartimento));
-    rLista->pUltimo = rLista->pUltimo->pProx;
-    rLista->pUltimo->ItemRocha = *pRocha;
-    rLista->pUltimo->pProx = NULL;
+int LEVaziaRocha(LCompartimento *rLista) {
+    return (rLista->lastR == rLista->firstR);
+}
+
+int LInsereRocha(LCompartimento* rLista, Rocha pRocha) {
+    if (rLista->lastR == MAXTAMR) {
+        return 0;
+    }
+    rLista->rochas[rLista->lastR++] = pRocha;
+    return 1;
 }
 
 void LImprimeRocha(LCompartimento *rLista) {
-    int cont = 1;
-    ApontadorRocha pAux = NULL;
-    pAux = rLista->pPrimeiro->pProx;
+    int i;
 
     printf("\nROCHAS\n");
     printf("----------------------------------\n\n");
-    while (pAux != NULL) {
-        printf("ID: %d\n", cont++);
-        printf("Peso: %d\n", pAux->ItemRocha.pesoI);
-        printf("Valor: %d\n\n", pAux->ItemRocha.valorI);
-
-        pAux = pAux->pProx;
+    for (i = rLista->firstR; i < rLista->lastR; i++) {
+        printf("ID: %d\n", rLista->rochas[i].idRocha);
+        printf("PESO: %d\n", rLista->rochas[i].pesoI);
+        printf("VALOR: %d\n", rLista->rochas[i].valorI);
     }
-    printf("----------------------------------\n");
 }

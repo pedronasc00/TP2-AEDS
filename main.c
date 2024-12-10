@@ -6,10 +6,11 @@
 
 int main() {
     clock_t start, stop;
-    start = clock();
 
     LSonda ListaSondas;
     Sonda sondas;
+    LCompartimento ListaRocha;
+    Rocha rochas;
     int valorI, pesoI;
     int QtdSondas = 3;
     
@@ -24,27 +25,26 @@ int main() {
 
     fscanf(arq, "%d", &N);
    
-    FLVaziaSonda(&ListaSondas);
+    FLVaziaSonda(&ListaSondas); // Não é mais necessário inicializar as sondas individualmente
+    FLVaziaRocha(&ListaRocha);
     
-    for (int i = 0; i < QtdSondas; i++) {
-        InicializaSonda(&sondas, (i + 1));
-        LInsereSondas(&ListaSondas, &sondas);
-    }
-    
-    Rocha *rochas = (Rocha*)malloc(N * sizeof(Rocha));
     for(int i = 0; i < N; i++){
         fscanf(arq, "%d %d", &pesoI, &valorI);
-        InicializaRocha(&rochas[i], i, pesoI, valorI);
+        InicializaRocha(&rochas, i, pesoI, valorI);
+        LInsereRocha(&ListaRocha, rochas);
     }
-
     fclose(arq);
 
-    AlgoritmoGuloso(&ListaSondas, rochas, N);
-    ImprimeSolucao(&ListaSondas);
+    LSonda melhorSolucao;
+    FLVaziaSonda(&melhorSolucao); // Initialize melhorSolucao
 
-    free(rochas);
+    start = clock();
+
+    bruteforce(&ListaRocha, MAXCAP, QtdSondas, &melhorSolucao);
 
     stop = clock();
     double time = ((double)(stop - start)) / CLOCKS_PER_SEC;
-    printf("\n Tempo Gasto = %.5lf segundos\n", time);
+    printf("\nTempo gasto %.5lf segundos\n\n", time);
+
+    return 0; 
 }
