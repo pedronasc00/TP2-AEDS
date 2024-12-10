@@ -14,12 +14,16 @@ int main() {
     int valorI, pesoI;
     int QtdSondas = 3;
     
-    printf("Nome do arquivo de entrada: ");
+    printf("Nome do arquivo de entrada(com extensao): ");
 
-    char nomearq[33];
-    FILE *arq;
-    scanf("%32s", nomearq);
-    arq = fopen(nomearq, "r");
+    char nomearq[255];
+    scanf("%254s", nomearq);
+    FILE *arq = fopen(nomearq, "r");
+
+    if (arq == NULL) {
+        perror("Erro ao abrir arquivo\n");
+        return 1;
+    }
 
     int N;
 
