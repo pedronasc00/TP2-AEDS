@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Sonda.h"
-#define MAXCAP 40
 
 void InicializaSonda(Sonda *sonda, int idSonda) {
     sonda->idSonda = idSonda;

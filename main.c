@@ -2,49 +2,57 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include "ListaSonda.h"
 
 int main() {
-   
+    clock_t start, stop;
 
     LSonda ListaSondas;
     Sonda sondas;
+    LCompartimento ListaRocha;
+    Rocha rochas;
     int valorI, pesoI;
     int QtdSondas = 3;
     
-    printf("Nome do arquivo de entrada: ");
+    printf("Nome do arquivo de entrada(com extensao): ");
 
-    char nomearq[33];
-    FILE *arq;
-    scanf("%32s", nomearq);
-    arq = fopen(nomearq, "r");
+    char nomearq[255];
+    scanf("%254s", nomearq);
+    FILE *arq = fopen(nomearq, "r");
+
+    if (arq == NULL) {
+        perror("Erro ao abrir arquivo\n");
+        return 1;
+    }
 
     int N;
 
     fscanf(arq, "%d", &N);
    
+    FLVaziaRocha(&ListaRocha);
     FLVaziaSonda(&ListaSondas);
-    
+
     for (int i = 0; i < QtdSondas; i++) {
-        InicializaSonda(&sondas, (i + 1));
-        LInsereSondas(&ListaSondas, &sondas);
+        InicializaSonda(&sondas, i + 1);
+        LInsereSondas(&ListaSondas, sondas);
     }
     
-    Rocha *rochas = (Rocha*)malloc(N * sizeof(Rocha));
     for(int i = 0; i < N; i++){
         fscanf(arq, "%d %d", &pesoI, &valorI);
-        InicializaRocha(&rochas[i], i, pesoI, valorI);
+        InicializaRocha(&rochas, i, pesoI, valorI);
+        LInsereRocha(&ListaRocha, rochas);
     }
-
     fclose(arq);
-    clock_t start, stop;
-    start = clock();
-    AlgoritmoGuloso(&ListaSondas, rochas, N);
-    ImprimeSolucao(&ListaSondas);
 
-    free(rochas);
+    start = clock();
+    
+    bruteforce(&ListaRocha, 40, QtdSondas, N, &ListaSondas);
+    LImprimeSonda(&ListaSondas);
 
     stop = clock();
     double time = ((double)(stop - start)) / CLOCKS_PER_SEC;
-    printf("\n Tempo Gasto = %.5lf segundos\n", time);
+    printf("\nTempo gasto %.5lf segundos\n\n", time);
+
+    return 0; 
 }

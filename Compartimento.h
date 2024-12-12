@@ -1,23 +1,19 @@
 #ifndef COMPARTIMENTO_H
 #define COMPARTIMENTO_H
 #include "Rocha.h"
+#define MAXTAMR 1000
 
-typedef struct TCelulaRocha *ApontadorRocha;
-typedef struct TCelulaRocha
-{
-    Rocha ItemRocha;
-    struct TCelulaRocha *pProx;
-} CCompartimento;
+typedef int ApontadorRocha;
 
-typedef struct
+typedef struct 
 {
-    ApontadorRocha pPrimeiro;
-    ApontadorRocha pUltimo;
+    Rocha rochas[MAXTAMR];
+    ApontadorRocha firstR, lastR;
 } LCompartimento;
 
 void FLVaziaRocha(LCompartimento* rLista);
 int LEVaziaRocha(LCompartimento* rLista);
-void LInsereRocha(LCompartimento* rLista, Rocha* pRocha);
+int LInsereRocha(LCompartimento* rLista, Rocha pRocha);
 void LImprimeRocha(LCompartimento* rLista);
 
 #endif

@@ -6,6 +6,7 @@ void InicializaRocha(Rocha *rch, int idRocha, int pesoI, int valorI) {
     rch->idRocha = idRocha;
     rch->pesoI = pesoI;
     rch->valorI = valorI;
+    rch->usada=0;
 }
 
 int comparar_rochas(const void *a, const void *b) {

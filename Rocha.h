@@ -5,6 +5,7 @@ typedef struct {
     int idRocha;
     int pesoI;
     int valorI;
+    int usada;
 } Rocha;
 
 void InicializaRocha(Rocha* rch, int idRocha, int pesoI, int valorI);
