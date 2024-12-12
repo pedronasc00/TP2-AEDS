@@ -47,7 +47,8 @@ int main() {
 
     start = clock();
     
-    bruteforce(&ListaRocha, MAXCAP, QtdSondas, N, &ListaSondas);
+    bruteforce(&ListaRocha, 40, QtdSondas, N, &ListaSondas);
+    LImprimeSonda(&ListaSondas);
 
     stop = clock();
     double time = ((double)(stop - start)) / CLOCKS_PER_SEC;
