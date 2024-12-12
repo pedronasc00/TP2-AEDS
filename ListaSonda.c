@@ -26,36 +26,6 @@ int LInsereSondas(LSonda *sLista, Sonda pSonda)
     return 1;
 }
 
-LCompartimento *gerar_combinacoes(LCompartimento *ListaRocha, int N)
-{
-    int numCombinacoes = pow(2, N);
-
-    LCompartimento *combinacoes = (LCompartimento *)malloc(numCombinacoes * sizeof(LCompartimento));
-
-    if (combinacoes == NULL)
-    {
-        perror("Erro ao alocar memoria");
-    }
-
-    for (int i = 0; i < numCombinacoes; i++)
-    {
-        FLVaziaRocha(&combinacoes[i]);
-
-        for (int j = 0; j < N; j++)
-        {
-            if ((i >> j) & 1)
-            {
-                if (!LInsereRocha(&combinacoes[i], ListaRocha->rochas[j]))
-                {
-                    perror("Erro ao inserir rocha na combinacao;\n");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
-    }
-    return combinacoes;
-}
-
 void forcabruta(LCompartimento *rochas, int capacidade, int numSondas, int N, LSonda *melhorSolucao) {
     for (int i = 0; i < numSondas; i++) {
         int melhorValorSonda = -1;
