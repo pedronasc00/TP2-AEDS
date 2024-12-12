@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdbool.h>
 #include "ListaSonda.h"
 
@@ -56,64 +56,72 @@ LCompartimento *gerar_combinacoes(LCompartimento *ListaRocha, int N)
     return combinacoes;
 }
 
-void bruteforce(LCompartimento *rochas, int capacidade, int numSondas, int N, LSonda *melhorSolucao)
-{
-    for (int i = 0; i < numSondas; i++)
-    {
+void forcabruta(LCompartimento *rochas, int capacidade, int numSondas, int N, LSonda *melhorSolucao) {
+    for (int i = 0; i < numSondas; i++) {
         int melhorValorSonda = -1;
+        int melhorNumItensSonda = -1; // Para desempate
         LCompartimento melhorCombinacaoSonda;
         FLVaziaRocha(&melhorCombinacaoSonda);
 
-        for (int k = 0; k < (1 << N); k++)
-        {
+        for (int k = 0; k < (1 << N); k++) { // Iterar por todas as combinações
             int pesoTotalCombinacao = 0;
             int valorTotalCombinacao = 0;
+            int numItensCombinacao = 0; // Contar itens na combinação
             bool combinacaoValida = true;
 
-            for (int j = 0; j < N; j++)
-            {
-                if ((k >> j) & 1)
-                {
-                    if (rochas->rochas[j].usada)
-                    {
-                        combinacaoValida = false;
-                        break;
-                    }
-                    pesoTotalCombinacao += rochas->rochas[j].pesoI;
-                    valorTotalCombinacao += rochas->rochas[j].valorI;
+            // Verificar a validade da combinação ANTES de calcular peso e valor
+            for (int j = 0; j < N; j++) {
+                if ((k >> j) & 1 && rochas->rochas[j].usada) {
+                    combinacaoValida = false;
+                    break; // Se uma rocha já foi usada, a combinação é inválida
                 }
             }
-            if (combinacaoValida && pesoTotalCombinacao <= capacidade && valorTotalCombinacao > melhorValorSonda)
-            {
-                melhorValorSonda = valorTotalCombinacao;
-                FLVaziaRocha(&melhorCombinacaoSonda);
 
-                for (int j = 0; j < N; j++)
-                {
-                    if ((k >> j) & 1)
-                    {
-                        LInsereRocha(&melhorCombinacaoSonda, rochas->rochas[j]);
-                        rochas->rochas[j].usada = 1;
+            // Calcular peso e valor apenas para combinações válidas
+            if (combinacaoValida) {
+                for (int j = 0; j < N; j++) {
+                    if ((k >> j) & 1) {
+                        pesoTotalCombinacao += rochas->rochas[j].pesoI;
+                        valorTotalCombinacao += rochas->rochas[j].valorI;
+                        numItensCombinacao++;
+                    }
+                }
+
+                // Verificar se a combinação é melhor que a atual
+                if (pesoTotalCombinacao <= capacidade && 
+                    (valorTotalCombinacao > melhorValorSonda ||
+                     (valorTotalCombinacao == melhorValorSonda && numItensCombinacao > melhorNumItensSonda))) {
+                    melhorValorSonda = valorTotalCombinacao;
+                    melhorNumItensSonda = numItensCombinacao;
+                    FLVaziaRocha(&melhorCombinacaoSonda); // Limpar a melhor combinação anterior
+
+                    for (int j = 0; j < N; j++) {
+                        if ((k >> j) & 1) {
+                            LInsereRocha(&melhorCombinacaoSonda, rochas->rochas[j]);
+                        }
                     }
                 }
             }
         }
-        if (melhorValorSonda > melhorSolucao->Sondas[i].valorAtual)
-        {
+
+        // Marcar as rochas usadas APÓS encontrar a melhor combinação para a sonda
+        for (int j = melhorCombinacaoSonda.firstR; j < melhorCombinacaoSonda.lastR; j++) {
+            for (int l = 0; l < N; l++) {  // Encontrar a rocha correspondente na lista original
+                if (rochas->rochas[l].idRocha == melhorCombinacaoSonda.rochas[j].idRocha) {
+                    rochas->rochas[l].usada = 1;
+                    break;
+                }
+            }
+        }
+
+        // Atualizar a melhor solução da sonda
+        if (melhorValorSonda > melhorSolucao->Sondas[i].valorAtual) {
             melhorSolucao->Sondas[i].valorAtual = melhorValorSonda;
-             FLVaziaRocha(&(melhorSolucao->Sondas[i].CompartimentoR));
-
-            for (int j = 0; j < N; j++)
-            {
-                if (rochas->rochas[j].usada == 1)
-                {
-                    LInsereRocha(&(melhorSolucao->Sondas[i].CompartimentoR), rochas->rochas[j]);
-                     
-                }
+            FLVaziaRocha(&(melhorSolucao->Sondas[i].CompartimentoR));
+            for (int j = melhorCombinacaoSonda.firstR; j < melhorCombinacaoSonda.lastR; j++) {
+                LInsereRocha(&(melhorSolucao->Sondas[i].CompartimentoR), melhorCombinacaoSonda.rochas[j]);
             }
         }
-        FLVaziaRocha(&melhorCombinacaoSonda);
-        
     }
 }
 
@@ -136,18 +144,3 @@ void LImprimeSonda(LSonda *sLista) {
     }
     printf("-------------------------------------\n");
 }
-/*if(melhorSolucao->first != melhorSolucao->last){ // Verifica se alguma solução foi encontrada
-
-    printf("SOLUCAO\n");
-    printf("-------------------------------------\n");
-    for (int k = melhorSolucao->first; k < melhorSolucao->last; k++) {
-        printf("Sonda %d: Peso: %.0f, Valor: %d, Rochas: [ ",
-                melhorSolucao->Sondas[k].idSonda, melhorSolucao->Sondas[k].pesoAtual, melhorSolucao->Sondas[k].valorAtual);
-
-        for (int r = melhorSolucao->Sondas[k].CompartimentoR.firstR; r < melhorSolucao->Sondas[k].CompartimentoR.lastR; r++) {
-            printf("%d ", melhorSolucao->Sondas[k].CompartimentoR.rochas[r].idRocha);
-        }
-        printf("]\n");
-    }
-    printf("-------------------------------------\n");
-    }*/

@@ -47,7 +47,7 @@ int main() {
 
     start = clock();
     
-    bruteforce(&ListaRocha, 40, QtdSondas, N, &ListaSondas);
+    forcabruta(&ListaRocha, 40, QtdSondas, N, &ListaSondas);
     LImprimeSonda(&ListaSondas);
 
     stop = clock();
