@@ -14,7 +14,8 @@ typedef struct
 void FLVaziaSonda(LSonda* sLista);
 int LEVaziaSonda(LSonda* sLista);
 int LInsereSondas(LSonda* sLista, Sonda pSonda);
-void bruteforce(LCompartimento *rochas, int capacity, int numSondas, LSonda *melhorSolucao);
-void LImprimeSolucao(LSonda* sLista);
+LCompartimento* gerar_combinacoes(LCompartimento *rochas, int N);
+void bruteforce(LCompartimento *rochas, int capacidade, int numSondas, int N, LSonda *melhorSolucao);
+void LImprimeSonda(LSonda* sLista);
 
 #endif

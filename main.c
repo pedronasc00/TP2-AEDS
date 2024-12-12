@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include "ListaSonda.h"
 
 int main() {
@@ -29,8 +30,13 @@ int main() {
 
     fscanf(arq, "%d", &N);
    
-    FLVaziaSonda(&ListaSondas); // Não é mais necessário inicializar as sondas individualmente
     FLVaziaRocha(&ListaRocha);
+    FLVaziaSonda(&ListaSondas);
+
+    for (int i = 0; i < QtdSondas; i++) {
+        InicializaSonda(&sondas, i + 1);
+        LInsereSondas(&ListaSondas, sondas);
+    }
     
     for(int i = 0; i < N; i++){
         fscanf(arq, "%d %d", &pesoI, &valorI);
@@ -39,12 +45,9 @@ int main() {
     }
     fclose(arq);
 
-    LSonda melhorSolucao;
-    FLVaziaSonda(&melhorSolucao); // Initialize melhorSolucao
-
     start = clock();
-
-    bruteforce(&ListaRocha, MAXCAP, QtdSondas, &melhorSolucao);
+    
+    bruteforce(&ListaRocha, MAXCAP, QtdSondas, N, &ListaSondas);
 
     stop = clock();
     double time = ((double)(stop - start)) / CLOCKS_PER_SEC;

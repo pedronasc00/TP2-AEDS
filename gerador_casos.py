@@ -15,5 +15,4 @@ def gerar_caso_teste(num_rochas, nome_arquivo):
 
 
 if __name__ == "__main__":
-    gerar_caso_teste(20, "teste20.txt")
-    gerar_caso_teste(25, "teste25.txt")
+    gerar_caso_teste(5, "teste5.txt")
