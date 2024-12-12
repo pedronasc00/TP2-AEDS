@@ -16,7 +16,6 @@ int LInsereRocha(LCompartimento* rLista, Rocha pRocha) {
         return 0;
     }
     rLista->rochas[rLista->lastR++] = pRocha;
-    rLista->rochas[rLista->lastR].usada = 0;
     return 1;
 }
 

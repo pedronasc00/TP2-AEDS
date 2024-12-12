@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdbool.h>
 #include "ListaSonda.h"
 
 void FLVaziaSonda(LSonda *sLista)
